@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
+import SignupFlow from './components/SignupFlow';
 import OnboardingFlow from './components/OnboardingFlow';
 import Dashboard from './components/Dashboard';
 import EnhancedDashboard from './components/EnhancedDashboard';
@@ -10,6 +11,7 @@ import TopicOverview from './components/TopicOverview';
 import AIAssessment from './components/AIAssessment';
 import CustomRoadmap from './components/CustomRoadmap';
 import CodingAssessment from './components/CodingAssessment';
+import JobAssessment from './components/JobAssessment';
 import './index.css';
 
 function App() {
@@ -50,8 +52,37 @@ function App() {
   };
 
   const handleSignup = () => {
-    setAuthMode('signup');
-    setShowAuthModal(true);
+    setCurrentView('signup-flow');
+  };
+
+  const handleSignupComplete = (userData) => {
+    setUser(userData);
+    // Create enhanced profile from signup data
+    const enhancedProfile = {
+      name: userData.name,
+      email: userData.email,
+      experience: userData.experience,
+      fieldOfInterest: userData.fieldOfInterest,
+      currentStatus: userData.currentStatus,
+      goals: userData.goals,
+      goal: { id: userData.fieldOfInterest, title: getJobTitle(userData.fieldOfInterest) },
+      streak: 0,
+      completedSkills: []
+    };
+    setUserProfile(enhancedProfile);
+    setCurrentView('dashboard');
+  };
+
+  const getJobTitle = (fieldId) => {
+    const titles = {
+      'frontend': 'Frontend Developer',
+      'backend': 'Backend Developer', 
+      'fullstack': 'Full Stack Developer',
+      'mobile': 'Mobile App Developer',
+      'devops': 'DevOps Engineer',
+      'data': 'Data Scientist'
+    };
+    return titles[fieldId] || 'Developer';
   };
 
   const handleLogout = () => {
@@ -98,7 +129,27 @@ function App() {
 
   const handleStartCoding = (module) => {
     setCurrentModule(module);
-    setCurrentView('coding-assessment');
+    if (module.type === 'job-assessment') {
+      setCurrentView('job-assessment');
+    } else {
+      setCurrentView('coding-assessment');
+    }
+  };
+
+  const handleJobAssessmentComplete = (assessmentResult) => {
+    // Update user profile with assessment results
+    setUserProfile(prev => ({
+      ...prev,
+      assessmentScore: assessmentResult.score,
+      customLearningPath: assessmentResult.learningPath,
+      jobRole: assessmentResult.jobRole
+    }));
+    setCustomLearningPath({
+      title: `${assessmentResult.jobRole.title} Learning Path`,
+      description: `Personalized path based on your assessment (Score: ${assessmentResult.score}%)`,
+      modules: assessmentResult.learningPath
+    });
+    setCurrentView('custom-roadmap');
   };
 
   const handleCodingComplete = (passed) => {
@@ -123,6 +174,13 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {currentView === 'landing' && (
         <LandingPage onLogin={handleLogin} onSignup={handleSignup} />
+      )}
+      
+      {currentView === 'signup-flow' && (
+        <SignupFlow 
+          onComplete={handleSignupComplete}
+          onBack={() => setCurrentView('landing')}
+        />
       )}
       
       {currentView === 'topic-search' && (
@@ -180,6 +238,14 @@ function App() {
           module={currentModule}
           onBack={handleBackToRoadmap}
           onComplete={handleCodingComplete}
+        />
+      )}
+
+      {currentView === 'job-assessment' && currentModule && (
+        <JobAssessment 
+          jobRole={currentModule}
+          onComplete={handleJobAssessmentComplete}
+          onBack={() => setCurrentView('dashboard')}
         />
       )}
       

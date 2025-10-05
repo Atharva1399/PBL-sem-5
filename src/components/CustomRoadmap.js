@@ -5,9 +5,10 @@ import { CheckCircle, Play, Lock, Clock, BookOpen, Trophy, ArrowLeft, Code } fro
 const CustomRoadmap = ({ learningPath, onBack, onStartModule, onStartCoding }) => {
   const [completedModules, setCompletedModules] = useState([]);
 
-  const getModuleStatus = (module) => {
-    if (completedModules.includes(module.id)) return 'completed';
-    if (module.id === 1 || completedModules.includes(module.id - 1)) return 'current';
+  const getModuleStatus = (module, index) => {
+    const moduleId = module.id || index;
+    if (completedModules.includes(moduleId)) return 'completed';
+    if (moduleId === 0 || index === 0 || completedModules.includes(moduleId - 1) || completedModules.includes(index - 1)) return 'current';
     return 'locked';
   };
 
@@ -22,7 +23,7 @@ const CustomRoadmap = ({ learningPath, onBack, onStartModule, onStartCoding }) =
     setCompletedModules(prev => [...prev, moduleId]);
   };
 
-  const progressPercentage = (completedModules.length / learningPath.modules.length) * 100;
+  const progressPercentage = learningPath.modules?.length ? (completedModules.length / learningPath.modules.length) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -38,8 +39,8 @@ const CustomRoadmap = ({ learningPath, onBack, onStartModule, onStartCoding }) =
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-800">{learningPath.topic} Learning Path</h1>
-                <p className="text-gray-600">AI-Generated • {learningPath.difficulty} Level • {learningPath.duration}</p>
+                <h1 className="text-2xl font-bold text-gray-800">{learningPath.title || learningPath.topic || 'Learning Path'}</h1>
+                <p className="text-gray-600">AI-Generated • {learningPath.difficulty || 'Beginner'} Level • {learningPath.duration || 'Varies'}</p>
               </div>
             </div>
             <div className="flex items-center space-x-6">
@@ -67,7 +68,7 @@ const CustomRoadmap = ({ learningPath, onBack, onStartModule, onStartCoding }) =
               transition={{ duration: 1, ease: "easeOut" }}
             />
           </div>
-          <p className="text-gray-600">{completedModules.length} of {learningPath.modules.length} modules completed</p>
+          <p className="text-gray-600">{completedModules.length} of {learningPath.modules?.length || 0} modules completed</p>
         </div>
 
         {/* AI Insights */}
@@ -79,18 +80,18 @@ const CustomRoadmap = ({ learningPath, onBack, onStartModule, onStartCoding }) =
             <div>
               <h3 className="text-lg font-semibold text-primary-800 mb-2">Personalized Learning Path</h3>
               <p className="text-primary-700 mb-4">
-                Based on your assessment, this path is tailored for your {learningPath.difficulty.toLowerCase()} level 
-                and focuses on practical applications. Estimated completion time: {learningPath.duration}.
+                Based on your assessment, this path is tailored for your {learningPath.difficulty?.toLowerCase() || 'beginner'} level 
+                and focuses on practical applications. Estimated completion time: {learningPath.duration || 'varies'}.
               </p>
               <div className="flex flex-wrap gap-2">
                 <span className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
-                  {learningPath.difficulty} Level
+                  {learningPath.difficulty || 'Beginner'} Level
                 </span>
                 <span className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
-                  {learningPath.duration}
+                  {learningPath.duration || 'Varies'}
                 </span>
                 <span className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
-                  {learningPath.modules.length} Modules
+                  {learningPath.modules?.length || 0} Modules
                 </span>
               </div>
             </div>
@@ -102,12 +103,12 @@ const CustomRoadmap = ({ learningPath, onBack, onStartModule, onStartCoding }) =
           <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">Learning Modules</h2>
           <div className="relative">
             <div className="flex flex-col items-center space-y-8">
-              {learningPath.modules.map((module, index) => {
-                const status = getModuleStatus(module);
+              {learningPath.modules?.map((module, index) => {
+                const status = getModuleStatus(module, index);
                 const isLast = index === learningPath.modules.length - 1;
                 
                 return (
-                  <div key={module.id} className="flex flex-col items-center w-full max-w-2xl">
+                  <div key={module.id || index} className="flex flex-col items-center w-full max-w-2xl">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -136,16 +137,16 @@ const CustomRoadmap = ({ learningPath, onBack, onStartModule, onStartCoding }) =
                           <h3 className={`text-xl font-semibold mb-2 ${
                             status === 'locked' ? 'text-gray-400' : 'text-gray-800'
                           }`}>
-                            {module.name}
+                            {module.title || module.name || 'Module'}
                           </h3>
                           <div className="flex items-center space-x-4 text-sm text-gray-500">
                             <div className="flex items-center">
                               <BookOpen className="w-4 h-4 mr-1" />
-                              Level {module.level}
+                              {module.difficulty || 'Beginner'}
                             </div>
                             <div className="flex items-center">
                               <Clock className="w-4 h-4 mr-1" />
-                              {module.estimated}
+                              {module.duration || module.estimated || '1 week'}
                             </div>
                           </div>
                         </div>
@@ -180,18 +181,18 @@ const CustomRoadmap = ({ learningPath, onBack, onStartModule, onStartCoding }) =
                     
                     {!isLast && (
                       <div className={`w-1 h-12 ${
-                        completedModules.includes(module.id) ? 'bg-success-500' : 'bg-gray-300'
+                        completedModules.includes(module.id || index) ? 'bg-success-500' : 'bg-gray-300'
                       }`} />
                     )}
                   </div>
                 );
-              })}
+              }) || []}
             </div>
           </div>
         </div>
 
         {/* Completion Message */}
-        {completedModules.length === learningPath.modules.length && (
+        {learningPath.modules?.length && completedModules.length === learningPath.modules.length && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -202,7 +203,7 @@ const CustomRoadmap = ({ learningPath, onBack, onStartModule, onStartCoding }) =
             </div>
             <h2 className="text-2xl font-bold text-success-800 mb-4">Congratulations!</h2>
             <p className="text-success-700 text-lg">
-              You've completed your {learningPath.topic} learning path! 
+              You've completed your {learningPath.title || learningPath.topic || 'learning'} path! 
               You're now ready to apply your knowledge in real-world projects.
             </p>
           </motion.div>

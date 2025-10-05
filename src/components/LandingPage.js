@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, Users, Trophy, BookOpen, ArrowRight, Play, Code, Brain, Zap, Target } from 'lucide-react';
+import { Star, Users, Trophy, BookOpen, ArrowRight, Code, Brain, Zap, Target } from 'lucide-react';
 
 const LandingPage = ({ onLogin, onSignup }) => {
   const features = [
@@ -209,17 +209,6 @@ const LandingPage = ({ onLogin, onSignup }) => {
               whileTap={{ scale: 0.95 }}
             >
               Start Learning <ArrowRight className="w-5 h-5 ml-2 inline" />
-            </motion.button>
-            <motion.button 
-              className="btn-secondary text-lg px-10 py-5 bg-white/80 backdrop-blur-sm hover:bg-white/90 shadow-lg"
-              whileHover={{ 
-                scale: 1.05,
-                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)"
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Play className="w-5 h-5 mr-2 inline" />
-              Watch Demo
             </motion.button>
           </motion.div>
           
